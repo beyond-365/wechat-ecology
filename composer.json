@@ -1,0 +1,22 @@
+{
+    "name": "beyond/wechat-ecology",
+    "type": "library",
+    "description": "wechat http ecommerce stock coupon",
+    "require": {
+        "beyond/smart-http": "^0.1.0",
+        "wechatpay/wechatpay-guzzle-middleware": "^0.2.2",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Beyond\\WeChatEcology\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "beyond",
+            "email": "gobeyond@petalmail.com"
+        }
+    ]
+}
