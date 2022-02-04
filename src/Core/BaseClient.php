@@ -9,13 +9,26 @@ use Beyond\SmartHttp\Kernel\Exceptions\BadRequestException;
 use Beyond\SmartHttp\Kernel\Exceptions\ResourceNotFoundException;
 use Beyond\SmartHttp\Kernel\Exceptions\ServiceInvalidException;
 use Beyond\SmartHttp\Kernel\Exceptions\ValidationException;
+use Beyond\SmartHttp\Kernel\ServiceContainer;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
-use Psr\Http\Message\ResponseInterface;
 
 class BaseClient extends Client
 {
+
+    /**
+     * BaseClient constructor.
+     * @param ServiceContainer $app
+     */
+    public function __construct(ServiceContainer $app)
+    {
+        if ($host = $app->offsetGet('config')->get('host', '')) {
+            $this->setBaseUri($host);
+        }
+
+        parent::__construct($app);
+    }
 
     /**
      * 处理请求异常 request
@@ -42,8 +55,9 @@ class BaseClient extends Client
             $contents = $response->getBody()->getContents();
             $content = json_decode($contents);
 
+            $code = property_exists($content, 'code') && is_int($content->code) ? $content->code : 100001;
             $message = property_exists($content, 'message') ? $content->message : '';
-            $code = property_exists($content, 'code') ? $content->code : 100000;
+            !is_numeric($content->code) && $message = sprintf('%s:%s', $content->code, $message);
 
             switch ($statusCode) {
                 case 404:
@@ -78,7 +92,7 @@ class BaseClient extends Client
      * @param array $files
      * @param array $form
      * @param array $query
-     * @return ResponseInterface
+     * @return array|string
      * @throws AuthorizationException
      * @throws BadRequestException
      * @throws ResourceNotFoundException
@@ -109,7 +123,7 @@ class BaseClient extends Client
      * @param $url
      * @param array $data
      * @param array $query
-     * @return ResponseInterface
+     * @return array|string
      * @throws AuthorizationException
      * @throws BadRequestException
      * @throws ResourceNotFoundException
@@ -129,7 +143,7 @@ class BaseClient extends Client
      * @param $url
      * @param array $data
      * @param array $query
-     * @return ResponseInterface
+     * @return array|string
      * @throws AuthorizationException
      * @throws BadRequestException
      * @throws ResourceNotFoundException
@@ -148,7 +162,7 @@ class BaseClient extends Client
      *
      * @param $url
      * @param array $data
-     * @return ResponseInterface
+     * @return array|string
      * @throws AuthorizationException
      * @throws BadRequestException
      * @throws ResourceNotFoundException
@@ -163,7 +177,7 @@ class BaseClient extends Client
     /**
      * @param $url
      * @param array $query
-     * @return ResponseInterface
+     * @return array|string
      * @throws AuthorizationException
      * @throws BadRequestException
      * @throws ResourceNotFoundException
